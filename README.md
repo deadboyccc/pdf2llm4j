@@ -3,8 +3,8 @@
 Turn a PDF into a **page-aware, LLM-friendly corpus**: Markdown per page, plain text, images, links, bookmarks,
 attachments, optional page renderings, and a machine-readable manifest.
 
-Written in modern **Java 25**, built on [Apache PDFBox](https://pdfbox.apache.org/) 3.x, built with **Gradle (Kotlin
-DSL)**. No other runtime dependencies.
+Written in **Java 25**, using [Apache PDFBox](https://pdfbox.apache.org/) 3.x and **Gradle (Kotlin DSL)**. Gradle
+manages the runtime libraries; no external services are required.
 
 ```bash
 ./gradlew installDist
@@ -13,15 +13,15 @@ build/install/pdf2llm/bin/pdf2llm book.pdf ./book-llm --render-pages
 
 ## Why
 
-PDFs are visual documents; their text layer is an afterthought. pdf2llm keeps the **original page boundary** as the unit
-of everything, so RAG chunks, citations and "go look at page 127" all stay aligned — and keeps a rendered image of each
-page for the cases where text alone loses meaning (diagrams, tables, equations, scans).
+PDFs are visual documents, and their text layer often loses layout and context. pdf2llm keeps each **original page
+boundary** as the unit of extraction, so retrieval chunks and citations stay aligned. Optional page renderings preserve
+visual details that text can miss, such as diagrams, tables, equations, and scans.
 
 ## Requirements
 
-- **JDK 25** to run the launcher script or the jar.
-- To build, nothing to install beyond a JDK for Gradle itself: the build requests a JDK 25 toolchain and the Foojay
-  resolver downloads one automatically if it is missing.
+- **JDK 25** to run the launcher script or jar.
+- For builds, the Gradle wrapper uses the Foojay resolver to provision the required JDK 25 toolchain if it is not
+  already installed.
 - Internet access on the first build (dependencies and, if needed, the JDK).
 
 ## Build and run
@@ -35,8 +35,8 @@ page for the cases where text alone loses meaning (diagrams, tables, equations, 
 | Tests                     | `./gradlew test`                                                                  |
 | Everything                | `./gradlew build`                                                                 |
 
-`./gradlew run` executes in the project directory, so pass absolute paths (or run the installed script from wherever
-your PDF is).
+`./gradlew run` executes with the project directory as its working directory. Pass absolute paths to avoid ambiguity, or
+use the installed script from any directory.
 
 Tuning the JVM: set `PDF2LLM_OPTS="-Xmx4g"` for the launcher script, or pass `-Xmx4g` to `java` for the jar. Large
 scanned books with `--render-pages` benefit from more heap.
@@ -51,18 +51,21 @@ If `OUTPUT_DIR` is omitted, `<INPUT-name>-llm/` is created **next to the PDF**.
 
 | Option                       | Description                                                                                                                                              |
 |------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `--render-pages`             | Render every page to `rendered-pages/page-NNNN.png`. Recommended for technical books and scans.                                                          |
+| `--render-pages`             | Render every selected page to `rendered-pages/page-NNNN.png`. Recommended for technical books and scans.                                                 |
 | `--dpi <n>`                  | Resolution for `--render-pages`, 36–1200 (default `120`; `150` is a good choice for small code listings).                                                |
 | `--no-images`                | Skip extraction of embedded image objects.                                                                                                               |
 | `--pages <spec>`             | Process only some pages: `5`, `1-10`, `1-10,15,20-`, `-3`. Page numbers stay absolute (`page-0127.md` is always PDF page 127).                           |
 | `--password <pw>`            | Password for encrypted PDFs. Prefer the `PDF2LLM_PASSWORD` environment variable — command-line arguments are visible to other users in process listings. |
 | `--no-sort`                  | Keep text in content-stream order instead of sorting by position. Try this if a multi-column page comes out interleaved.                                 |
-| `--force`                    | Allow writing into a non-empty `OUTPUT_DIR`. Only files pdf2llm itself generates (listed below) are replaced; nothing else is touched.                   |
+| `--force`                    | Allow writing into a non-empty `OUTPUT_DIR`. Replaces pdf2llm's known output paths; unrelated entries at the output root are left untouched.             |
 | `--verbose`                  | Show PDFBox warnings (suppressed by default; font warnings are very noisy) and stack traces.                                                             |
 | `-h`, `--help` / `--version` | Help / version.                                                                                                                                          |
 
-Both `--opt value` and `--opt=value` work; `--` ends option parsing. Exit codes: `0` success, `1` extraction failed, `2`
-invalid arguments.
+Both `--opt value` and `--opt=value` work; `--` ends option parsing. Exit codes are `0` for success, `1` for an
+extraction failure, and `2` for invalid arguments.
+
+When using `--force`, do not keep unrelated files inside generated paths such as `pages/`, `images/`, or
+`rendered-pages/`; those paths are replaced.
 
 ### Examples
 
@@ -81,7 +84,7 @@ book-llm/
 ├── document.md          entry point: metadata, directory guide, bookmarks, page index, notes, warnings
 ├── manifest.json        machine-readable index (pages, images, attachments, options, warnings)
 ├── all-text.txt         all text, separated by "===== PAGE n / N ====="
-├── annotations.md       every link / annotation, with links to the target page files
+├── annotations.md       collected links and text-bearing annotations
 ├── xmp.xml              raw XMP metadata (when present)
 ├── pages/page-0001.md   one file per page
 ├── images/              embedded images as PNG (when present)
@@ -89,7 +92,8 @@ book-llm/
 └── attachments/         files embedded in the PDF (when present)
 ```
 
-Directories are created only when there is something to put in them.
+`pages/` is always created. The image, rendering, and attachment directories are created as needed based on the PDF
+contents and selected options.
 
 ### `pages/page-NNNN.md`
 
@@ -134,8 +138,8 @@ Design notes:
 - **Text is fenced** (with a fence longer than any backtick run in the text), so extracted `#`, `*` or `---` can never
   be mistaken for document structure and code keeps its spacing.
 - **Images used on many pages** (logos, headers) are written once and referenced from every page that uses them.
-- **Links are resolved**: internal links, named destinations and bookmarks are mapped to page numbers and linked to the
-  page files.
+- **Links are resolved**: internal links and named destinations are mapped to page numbers and linked to extracted page
+  files when available. Bookmarks include their destination page numbers.
 - **Navigation links** let an agent walk the document page by page.
 
 ### `manifest.json`
@@ -150,7 +154,8 @@ Design notes:
     "pageCount": 400,
     "pdfVersion": "1.7",
     "encrypted": false,
-    ...
+    "title": null,
+    "author": null
   },
   "options": {
     "pages": "all",
@@ -178,8 +183,8 @@ Design notes:
 }
 ```
 
-`hasText: false` is the quickest way to find pages that are scans or need OCR. (The `source` object is abbreviated
-above.)
+`hasText: false` is a quick way to find pages that may be scans or need OCR. The sample shows one page; a real manifest
+contains an entry for each selected page.
 
 ## Recommended workflow for technical books
 
@@ -199,8 +204,8 @@ model the matching `rendered-pages/page-NNNN.png` too.
 
 ## Robustness
 
-- A failure on one page (text, image, annotation or render) is recorded as a warning in `manifest.json` / `document.md`
-  and extraction continues.
+- Recoverable page-level failures (text, image, annotation, or rendering) are recorded as warnings in
+  `manifest.json` and `document.md`; extraction continues.
 - Malformed bookmark trees (cycles), form-XObject cycles and name-tree cycles are detected rather than looping.
 - Attachment names are sanitised (no path traversal; Unicode letters are kept) and de-duplicated case-insensitively.
 - Numbers in file names are never locale-formatted, so `page-0007.md` stays ASCII under any system locale.
@@ -209,14 +214,18 @@ model the matching `rendered-pages/page-NNNN.png` too.
 
 ## Limitations
 
-- **No OCR.** Scanned pages without a text layer produce empty text; use `--render-pages` and OCR/vision downstream.
+- **No OCR.** Scanned pages without a text layer produce empty text; use `--render-pages` and an OCR or vision tool
+  downstream.
 - **Layout is not preserved in text.** Multi-column pages, tables and positioned text may read out of order — try
   `--no-sort`, or use the rendering.
 - **Images:** only embedded image XObjects are extracted (not inline images or vector art). Use `--render-pages` for
   complete visuals.
-- **Link text** is not captured (only the target), and remote (`GoToR`) links are listed without a page.
+- **Link text** is not captured (only the target). Remote (`GoToR`) links are not resolved and may be omitted.
 
 ## Development
+
+Run the complete local build and test suite with `./gradlew build`. GitHub Actions runs the same build for pushes and
+pull requests.
 
 ```text
 pdf2llm/
@@ -280,5 +289,5 @@ corpora get committed.
 
 ## License
 
-This project is licensed under the Apache License 2.0, the same license used by Apache PDFBox. See [LICENSE](LICENSE)for
-the full license text. Third-party dependencies retain their respective licenses.
+This project is licensed under the Apache License 2.0, the same license used by Apache PDFBox. See [LICENSE](LICENSE)
+for the full license text. Third-party dependencies retain their respective licenses.

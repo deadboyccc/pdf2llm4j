@@ -65,7 +65,11 @@ final class Links {
 
             if (uri == null && destinationPage.isEmpty() && contents == null) return Optional.empty();
             return Optional.of(new AnnotationRecord(
-                    pageNumber, subtype, contents, uri, destinationPage.isPresent() ? destinationPage.getAsInt() : null));
+                    pageNumber,
+                    subtype,
+                    contents,
+                    uri,
+                    destinationPage.isPresent() ? destinationPage.getAsInt() : null));
         }
 
         // Other annotation types are only interesting when they carry text (comments, notes, highlights).

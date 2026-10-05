@@ -93,7 +93,8 @@ class PdfExtractorTest {
         try (var images = Files.list(out.resolve("images"))) {
             assertEquals(1L, images.count());
         }
-        assertTrue(manifest.pages().stream().allMatch(p -> p.images().equals(List.of("images/page-0001-image-001.png"))));
+        assertTrue(manifest.pages().stream()
+                .allMatch(p -> p.images().equals(List.of("images/page-0001-image-001.png"))));
         assertEquals(1, manifest.images().size());
 
         var json = Files.readString(out.resolve("manifest.json"));

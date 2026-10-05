@@ -68,7 +68,8 @@ public final class Main {
             return EXIT_FAILURE;
         } catch (OutOfMemoryError _) {
             err.println();
-            err.println("Error: out of memory. Raise the heap, e.g. PDF2LLM_OPTS=\"-Xmx4g\" (start script) or java -Xmx4g -jar ...");
+            err.println("Error: out of memory. Raise the heap, e.g. "
+                    + "PDF2LLM_OPTS=\"-Xmx4g\" (start script) or java -Xmx4g -jar ...");
             return EXIT_FAILURE;
         } catch (Exception e) {
             err.println();

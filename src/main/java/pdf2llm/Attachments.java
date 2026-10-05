@@ -46,7 +46,8 @@ final class Attachments {
         }
     }
 
-    private static <T extends COSObjectable> void walk(PDNameTreeNode<T> node, int depth, BiConsumer<String, T> visitor) {
+    private static <T extends COSObjectable> void walk(
+            PDNameTreeNode<T> node, int depth, BiConsumer<String, T> visitor) {
         if (node == null || depth > MAX_TREE_DEPTH) return;
 
         Map<String, T> names = null;
@@ -61,7 +62,7 @@ final class Attachments {
         try {
             kids = node.getKids();
         } catch (Exception _) {
-            // ditto
+            // Some malformed PDFs make an individual child node unreadable.
         }
         if (kids != null) {
             for (var kid : kids) walk(kid, depth + 1, visitor);

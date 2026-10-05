@@ -39,7 +39,8 @@ final class Markdown {
 
         sb.append("## Text\n\n");
         if (page.text().isBlank()) {
-            sb.append("[No selectable text extracted. This page may be scanned/image-only or use an encoding PDFBox cannot decode.]\n\n");
+            sb.append("[No selectable text extracted. This page may be scanned/image-only or use an "
+                    + "encoding PDFBox cannot decode.]\n\n");
         } else {
             sb.append(Text.fenced(page.text())).append("\n\n");
         }
@@ -48,7 +49,8 @@ final class Markdown {
             sb.append("## Embedded images\n\n");
             for (var image : page.images()) {
                 var name = Text.escapeMarkdown(image.name());
-                sb.append("### ").append(name).append(" (").append(image.width()).append(" × ").append(image.height()).append(")\n\n");
+                sb.append("### ").append(name).append(" (")
+                        .append(image.width()).append(" × ").append(image.height()).append(")\n\n");
                 sb.append("![").append(name).append("](../").append(image.path()).append(")\n\n");
             }
         }
@@ -83,7 +85,8 @@ final class Markdown {
         return sb.toString();
     }
 
-    private static String annotationLine(AnnotationRecord a, String pagePrefix, Set<Integer> selected, boolean includePage) {
+    private static String annotationLine(
+            AnnotationRecord a, String pagePrefix, Set<Integer> selected, boolean includePage) {
         var sb = new StringBuilder("- ");
         if (includePage) sb.append("Page ").append(a.page()).append(": ");
         sb.append("**").append(Text.escapeMarkdown(a.subtype())).append("**");

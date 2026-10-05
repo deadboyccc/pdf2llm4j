@@ -32,7 +32,12 @@ final class Outlines {
     }
 
     private static void append(
-            StringBuilder sb, PDDocument doc, PDOutlineItem first, int depth, PageIndex pages, Set<COSDictionary> visited) {
+            StringBuilder sb,
+            PDDocument doc,
+            PDOutlineItem first,
+            int depth,
+            PageIndex pages,
+            Set<COSDictionary> visited) {
         for (var current = first; current != null && visited.size() < MAX_ITEMS; current = current.getNextSibling()) {
             // Malformed files can contain cycles; never visit the same item twice.
             if (!visited.add(current.getCOSObject())) return;

@@ -35,7 +35,8 @@ record Options(
     }
 
     Options withRenderPages(boolean value) {
-        return new Options(input, outputDir, value, extractImages, dpi, pages, password, sortByPosition, force, verbose);
+        return new Options(
+                input, outputDir, value, extractImages, dpi, pages, password, sortByPosition, force, verbose);
     }
 
     Options withExtractImages(boolean value) {
@@ -43,15 +44,18 @@ record Options(
     }
 
     Options withDpi(float value) {
-        return new Options(input, outputDir, renderPages, extractImages, value, pages, password, sortByPosition, force, verbose);
+        return new Options(
+                input, outputDir, renderPages, extractImages, value, pages, password, sortByPosition, force, verbose);
     }
 
     Options withPages(PageSelection value) {
-        return new Options(input, outputDir, renderPages, extractImages, dpi, value, password, sortByPosition, force, verbose);
+        return new Options(
+                input, outputDir, renderPages, extractImages, dpi, value, password, sortByPosition, force, verbose);
     }
 
     Options withPassword(String value) {
-        return new Options(input, outputDir, renderPages, extractImages, dpi, pages, value, sortByPosition, force, verbose);
+        return new Options(
+                input, outputDir, renderPages, extractImages, dpi, pages, value, sortByPosition, force, verbose);
     }
 
     Options withSortByPosition(boolean value) {
@@ -59,10 +63,12 @@ record Options(
     }
 
     Options withForce(boolean value) {
-        return new Options(input, outputDir, renderPages, extractImages, dpi, pages, password, sortByPosition, value, verbose);
+        return new Options(
+                input, outputDir, renderPages, extractImages, dpi, pages, password, sortByPosition, value, verbose);
     }
 
     Options withVerbose(boolean value) {
-        return new Options(input, outputDir, renderPages, extractImages, dpi, pages, password, sortByPosition, force, value);
+        return new Options(
+                input, outputDir, renderPages, extractImages, dpi, pages, password, sortByPosition, force, value);
     }
 }

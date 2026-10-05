@@ -236,15 +236,20 @@ final class PdfExtractor {
                 var page = doc.getPage(pageNumber - 1);
                 var text = pageText(stripper, doc, pageNumber);
                 List<ImageAsset> images =
-                        imageExtractor == null ? List.of() : imageExtractor.extractFrom(page.getResources(), pageNumber);
+                        imageExtractor == null
+                                ? List.of()
+                                : imageExtractor.extractFrom(page.getResources(), pageNumber);
                 var annotations = Links.collect(catalog, page, pageNumber, pageIndex, this::warn);
                 allAnnotations.addAll(annotations);
                 String rendered = renderer == null ? null : renderPage(renderer, pageNumber);
                 String label = labelFor(pageLabels, pageNumber);
 
                 var file = "pages/" + Text.pageFileName(pageNumber);
-                var content = new Markdown.PageContent(pageNumber, totalPages, label, text, images, rendered, annotations);
-                Files.writeString(outDir.resolve(file), Markdown.page(options.input().getFileName().toString(), content, selectedSet),
+                var content = new Markdown.PageContent(
+                        pageNumber, totalPages, label, text, images, rendered, annotations);
+                Files.writeString(
+                        outDir.resolve(file),
+                        Markdown.page(options.input().getFileName().toString(), content, selectedSet),
                         StandardCharsets.UTF_8);
 
                 allText.write("\n===== PAGE " + pageNumber + " / " + totalPages + " =====\n\n");
@@ -265,7 +270,10 @@ final class PdfExtractor {
 
         // ---- document.md, annotations.md, manifest.json -------------------------------------
         Files.writeString(outDir.resolve("document.md"), documentMarkdown(head, entries), StandardCharsets.UTF_8);
-        Files.writeString(outDir.resolve("annotations.md"), Markdown.annotations(allAnnotations, selectedSet), StandardCharsets.UTF_8);
+        Files.writeString(
+                outDir.resolve("annotations.md"),
+                Markdown.annotations(allAnnotations, selectedSet),
+                StandardCharsets.UTF_8);
 
         var manifest = new Manifest(
                 "pdf2llm",
@@ -294,7 +302,12 @@ final class PdfExtractor {
     }
 
     private StringBuilder documentHead(
-            PDDocument doc, PDDocumentCatalog catalog, PDDocumentInformation info, String title, int totalPages, int extracted) {
+            PDDocument doc,
+            PDDocumentCatalog catalog,
+            PDDocumentInformation info,
+            String title,
+            int totalPages,
+            int extracted) {
         var head = new StringBuilder();
         head.append("# ").append(Text.escapeMarkdown(title)).append("\n\n");
         head.append("> PDF extracted by pdf2llm for LLM consumption. Text and assets are split by page ")
@@ -337,7 +350,8 @@ final class PdfExtractor {
     private String documentMarkdown(StringBuilder head, List<PageEntry> entries) {
         var body = new StringBuilder(head);
         body.append("## Pages\n\n");
-        body.append("Each page has its own Markdown file under `pages/`; use them for page-level retrieval and citation.\n\n");
+        body.append("Each page has its own Markdown file under `pages/`; use them for page-level retrieval "
+                + "and citation.\n\n");
         for (var e : entries) {
             body.append("- [Page ").append(e.page()).append("](").append(e.file()).append(')');
             if (e.label() != null) body.append(" — label ").append(Text.escapeMarkdown(e.label()));
@@ -347,15 +361,19 @@ final class PdfExtractor {
         }
 
         body.append("\n## Extraction notes\n\n");
-        body.append("- Text extraction preserves text content but not the full visual layout. Reading order can differ on complex multi-column pages, tables, or positioned text.\n");
-        body.append("- Embedded image XObjects are decoded to PNG when possible. Inline images and vector graphics are not extracted.\n");
+        body.append("- Text extraction preserves text content but not the full visual layout. Reading order "
+                + "can differ on complex multi-column pages, tables, or positioned text.\n");
+        body.append("- Embedded image XObjects are decoded to PNG when possible. Inline images and vector "
+                + "graphics are not extracted.\n");
         if (options.renderPages()) {
             body.append("- Full-page PNG renderings are in `rendered-pages/` (").append((int) options.dpi())
                     .append(" DPI); consult them for diagrams, tables, equations and scans.\n");
         } else {
-            body.append("- Page renderings were not requested. Re-run with `--render-pages` to preserve the visual appearance of every page.\n");
+            body.append("- Page renderings were not requested. Re-run with `--render-pages` to preserve the "
+                    + "visual appearance of every page.\n");
         }
-        body.append("- OCR is not performed. Scanned pages have no selectable text unless an OCR layer already exists.\n");
+        body.append("- OCR is not performed. Scanned pages have no selectable text unless an OCR layer "
+                + "already exists.\n");
         if (!warnings.isEmpty()) {
             body.append("\n## Warnings\n\n");
             for (var w : warnings) body.append("- ").append(Text.escapeMarkdown(w)).append('\n');

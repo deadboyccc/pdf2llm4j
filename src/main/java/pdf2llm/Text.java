@@ -109,7 +109,8 @@ final class Text {
     }
 
     /**
-     * Returns {@code candidate}, or {@code stem-2.ext}, {@code stem-3.ext}... if a name differing only by case is taken.
+     * Returns {@code candidate}, or {@code stem-2.ext}, {@code stem-3.ext}... if a name differing only
+     * by case is taken.
      */
     static String uniqueFileName(String candidate, Set<String> used) {
         if (used.add(candidate.toLowerCase(Locale.ROOT))) return candidate;

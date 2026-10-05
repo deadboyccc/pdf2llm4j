@@ -107,7 +107,8 @@ final class Cli {
 
         if (positional.isEmpty()) throw new UsageException("Missing input PDF.");
         if (positional.size() > 2) {
-            throw new UsageException("Too many positional arguments: " + String.join(" ", positional.subList(2, positional.size())));
+            var extras = String.join(" ", positional.subList(2, positional.size()));
+            throw new UsageException("Too many positional arguments: " + extras);
         }
 
         var input = Path.of(positional.get(0)).toAbsolutePath().normalize();

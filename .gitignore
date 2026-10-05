@@ -1,0 +1,15 @@
+# Gradle
+.gradle/
+build/
+out/
+local.properties
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.fleet/
+
+# Generated corpora and source documents
+*-llm/
+*.pdf

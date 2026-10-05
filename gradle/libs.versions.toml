@@ -1,0 +1,16 @@
+[versions]
+pdfbox = "3.0.8"
+jbig2 = "3.0.4"
+junit = "6.0.3"
+shadow = "9.4.3"
+
+[libraries]
+pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
+# Decoder for JBIG2-compressed images (common in scanned books). Loaded through the ImageIO SPI at runtime.
+jbig2-imageio = { module = "org.apache.pdfbox:jbig2-imageio", version.ref = "jbig2" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
